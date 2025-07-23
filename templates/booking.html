@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book for {{ movie }}</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: mediumvioletred;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .form-container {
+            background: #fff;
+            padding: 30px;
+            margin: 50px auto;
+            border-radius: 15px;
+            max-width: 600px;
+            color: #333;
+        }
+
+        .form-control, .form-select {
+            margin-bottom: 15px;
+        }
+
+        .btn-primary {
+            width: 100%;
+        }
+
+        .total-cost {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="form-container shadow">
+        <h2 class="text-center mb-4">🎬 Booking for <span class="text-primary">{{ movie }}</span></h2>
+
+        <form action="/confirm" method="POST" id="bookingForm">
+            <input type="hidden" name="movie" value="{{ movie }}">
+
+            <input type="text" class="form-control" name="name" placeholder="Your Name" required>
+            <input type="text" class="form-control" name="phone" placeholder="Phone Number" required>
+
+            <!-- Place Dropdown -->
+            <select class="form-select" name="place" id="placeSelect" required>
+                <option value="">Select Place</option>
+                <option value="Anantapur">Anantapur</option>
+                <option value="Hyderabad">Hyderabad</option>
+                <option value="Bangalore">Bangalore</option>
+                <option value="Dharmavaram">Dharmavaram</option>
+                <option value="Kadapa">Kadapa</option>
+            </select>
+
+            <!-- Theater Dropdown -->
+            <select class="form-select" name="theater" id="theaterSelect" required>
+                <option value="">Select Theater</option>
+            </select>
+
+            <!-- Hidden Ticket Price -->
+            <input type="hidden" name="ticket_price" id="ticketPrice">
+
+            <!-- Show Time -->
+            <select class="form-select" name="timing" required>
+                <option value="">Select Time</option>
+                <option>10:00 AM</option>
+                <option>2:00 PM</option>
+                <option>6:00 PM</option>
+                <option>9:00 PM</option>
+            </select>
+
+            <input type="date" class="form-control" name="date" required>
+            <input type="number" class="form-control" name="persons" id="persons" placeholder="Number of Persons" min="1" required>
+            <input type="text" class="form-control" name="seats" placeholder="Seats (e.g., A1,A2)" required>
+
+            <!-- Total Cost Display -->
+            <p class="total-cost" id="totalCost">Total: ₹0</p>
+
+            <button type="submit" class="btn btn-primary">Confirm Booking</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const theaters = {
+        Anantapur: [
+            { name: "Siri Ramulamma Theater", price: 120 },
+            { name: "Anantha Cineplex", price: 150 },
+            { name: "Galaxy Cinemas", price: 140 },
+            { name: "Spandana Theatre", price: 130 }
+        ],
+        Hyderabad: [
+            { name: "PVR Inorbit", price: 250 },
+            { name: "Prasads IMAX", price: 300 },
+            { name: "Asian Radhika", price: 180 },
+            { name: "GVK One INOX", price: 260 }
+        ],
+        Bangalore: [
+            { name: "Orion Mall INOX", price: 220 },
+            { name: "Forum PVR", price: 200 },
+            { name: "Cinepolis Royal Meenakshi", price: 190 },
+            { name: "Garuda Mall INOX", price: 210 }
+        ],
+        Dharmavaram: [
+            { name: "Ram Cinemas", price: 100 },
+            { name: "Lakshmi Theatre", price: 90 },
+            { name: "RK Complex", price: 95 },
+            { name: "Veerabhadra Theatre", price: 110 }
+        ],
+        Kadapa: [
+            { name: "SVR Cinemas", price: 130 },
+            { name: "Aruna Theatre", price: 110 },
+            { name: "Sudha Theatre", price: 120 },
+            { name: "Rama Krishna Cineplex", price: 115 }
+        ]
+    };
+
+    const placeSelect = document.getElementById('placeSelect');
+    const theaterSelect = document.getElementById('theaterSelect');
+    const ticketPriceInput = document.getElementById('ticketPrice');
+    const personsInput = document.getElementById('persons');
+    const totalCostDisplay = document.getElementById('totalCost');
+
+    function updateTheaters() {
+        const place = placeSelect.value;
+        theaterSelect.innerHTML = '<option value="">Select Theater</option>';
+        ticketPriceInput.value = '';
+        totalCostDisplay.textContent = "Total: ₹0";
+
+        if (theaters[place]) {
+            theaters[place].forEach(theater => {
+                const option = document.createElement('option');
+                option.value = theater.name;
+                option.textContent = `${theater.name} (₹${theater.price})`;
+                option.setAttribute('data-price', theater.price);
+                theaterSelect.appendChild(option);
+            });
+        }
+    }
+
+    function calculateTotal() {
+        const selectedOption = theaterSelect.options[theaterSelect.selectedIndex];
+        const price = parseInt(selectedOption?.getAttribute('data-price')) || 0;
+        const persons = parseInt(personsInput.value) || 0;
+        const total = price * persons;
+        ticketPriceInput.value = price;
+        totalCostDisplay.textContent = `Total: ₹${total}`;
+    }
+
+    placeSelect.addEventListener('change', updateTheaters);
+    theaterSelect.addEventListener('change', calculateTotal);
+    personsInput.addEventListener('input', calculateTotal);
+</script>
+
+</body>
+</html>
